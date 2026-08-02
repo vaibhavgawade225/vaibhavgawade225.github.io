@@ -343,6 +343,15 @@
   }
   .field input::placeholder, .field textarea::placeholder{color:var(--ink-dim);}
   .field input:focus, .field textarea:focus{outline:none;border-color:var(--teal);background:rgba(255,255,255,0.08);}
+  .field input[type="file"]{
+    padding:10px 12px;font-size:13px;color:var(--ink-soft);cursor:pointer;
+  }
+  .field input[type="file"]::file-selector-button{
+    background:var(--teal);color:var(--bg);border:none;border-radius:8px;
+    padding:8px 14px;font-size:12.5px;font-weight:600;margin-right:12px;cursor:pointer;
+    transition:background .2s;
+  }
+  .field input[type="file"]::file-selector-button:hover{background:#4EE8D6;}
   .submit-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
   #formStatus{font-size:13px;font-weight:600;color:var(--teal);opacity:0;transition:opacity .3s;}
   #formStatus.show{opacity:1;}
@@ -681,10 +690,18 @@
             <div class="row"><div class="ic">⌖</div><div><div class="lbl">Location</div><span class="val">Wakad, Pune, Maharashtra</span></div></div>
           </div>
         </div>
-        <form id="contactForm" onsubmit="return handleSubmit(event)">
+        <form id="contactForm" action="https://formsubmit.co/vaibhavgawade225@gmail.com" method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="_subject" value="[Portfolio Contact] New Message from Website">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="_next" value="https://vaibhavgawade225.github.io/#contact-success">
           <div class="field"><label for="name">Name</label><input type="text" id="name" name="name" required placeholder="Your name"></div>
           <div class="field"><label for="email">Email</label><input type="email" id="email" name="email" required placeholder="you@example.com"></div>
           <div class="field"><label for="message">Message</label><textarea id="message" name="message" rows="4" required placeholder="What would you like to talk about?"></textarea></div>
+          <div class="field">
+            <label for="attachment">Attachment <span style="font-weight:400;text-transform:none;color:var(--ink-dim);">(optional, max 10MB)</span></label>
+            <input type="file" id="attachment" name="attachment" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+          </div>
           <div class="submit-row">
             <button type="submit" class="btn-primary" id="submitBtn" style="border:none;cursor:pointer;">Send Message →</button>
             <span id="formStatus"></span>
@@ -819,54 +836,21 @@
   }, { threshold: 0.5 });
   counters.forEach(c => countIO.observe(c));
 
-  // FormSubmit.co — no signup needed. First submission triggers a one-time
-  // confirmation email to vaibhavgawade225@gmail.com; click it once, then
-  // every future submission delivers automatically.
-  const FORM_ENDPOINT = 'https://formsubmit.co/ajax/vaibhavgawade225@gmail.com';
-
-  async function handleSubmit(e){
-    e.preventDefault();
-    const form = document.getElementById('contactForm');
+  // Contact form submits as a plain HTML POST to FormSubmit.co (no signup
+  // needed — first submission triggers a one-time confirmation email to
+  // vaibhavgawade225@gmail.com; click it once, then future submissions
+  // deliver automatically). After submitting, FormSubmit redirects back
+  // here with #contact-success in the URL — we detect that and show a
+  // friendly success message instead of leaving the raw redirect.
+  if (window.location.hash === '#contact-success') {
     const status = document.getElementById('formStatus');
-    const btn = document.getElementById('submitBtn');
-    const originalBtnText = btn.textContent;
-
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
-    status.textContent = '';
-    status.className = '';
-
-    try {
-      const formData = new FormData(form);
-      formData.append('_subject', 'New message from portfolio site');
-      formData.append('_template', 'table');
-
-      const response = await fetch(FORM_ENDPOINT, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (response.ok) {
-        status.textContent = 'Message sent successfully! I\'ll get back to you soon.';
-        status.style.color = 'var(--teal)';
-        status.classList.add('show');
-        form.reset();
-      } else {
-        status.textContent = 'Something went wrong. Please email me directly instead.';
-        status.style.color = 'var(--pink)';
-        status.classList.add('show');
-      }
-    } catch (err) {
-      status.textContent = 'Network error. Please email me directly at vaibhavgawade225@gmail.com';
-      status.style.color = 'var(--pink)';
+    if (status) {
+      status.textContent = 'Message sent successfully! I\'ll get back to you soon.';
+      status.style.color = 'var(--teal)';
       status.classList.add('show');
-    } finally {
-      btn.textContent = originalBtnText;
-      btn.disabled = false;
-      setTimeout(() => status.classList.remove('show'), 6000);
     }
-    return false;
+    // clean the hash from the URL without adding a new history entry
+    history.replaceState(null, '', window.location.pathname + '#contact');
   }
 </script>
 
